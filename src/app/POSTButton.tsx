@@ -42,29 +42,56 @@ export function POSTButton() {
     // console.log({filteredMusic})
     setMusic(urls)
   }
+  const [transcript, setTranscript] = useState<string>('');
+
+  const handleSpeechToText = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ja-JP';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const lastResult = event.results[event.results.length - 1];
+      if (lastResult.isFinal) {
+        const text = lastResult[0].transcript;
+        setTranscript(text);
+        console.log(`Recognized text: ${text}`);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+    };
+  };
 
 
   return (
-    <div>
-      <button onClick={handleNoPostClick}>GETオンリー</button>
-      <br/>
-      <button onClick={handleOnClick}>POST</button>
-      <label>
-        prompt:
-        <textarea onChange={(e) => {
-          setPrompt(e.target.value)
-        }}></textarea>
-      </label>
-      {music.map((m, index) => {
-        return <a key={index} href={m} rel="noopener noreferrer" target="_blank">Music</a>
-      })}
-    </div>
+      <div>
+        <button onClick={handleNoPostClick}>GETオンリー</button>
+        <br/>
+        <button onClick={handleOnClick}>POST</button>
+        <label>
+          prompt:
+          <textarea onChange={(e) => {
+            setPrompt(e.target.value)
+          }}></textarea>
+        </label>
+        {music.map((m, index) => {
+          return <a key={index} href={m} rel="noopener noreferrer" target="_blank">Music</a>
+        })}
+        <br/>
+        <button onClick={handleSpeechToText}>音声認識開始</button>
+        <p>認識されたテキスト: {transcript}</p>
+      </div>
   )
 }
 
 const idList = [
-    "6bdd0814-433f-43e4-9849-3f387b5dfae1",
-    "57a5dfd2-ea58-44c6-9a2c-5b99f0aa7cf2",
+  "6bdd0814-433f-43e4-9849-3f387b5dfae1",
+  "57a5dfd2-ea58-44c6-9a2c-5b99f0aa7cf2",
     "191d62e4-2a40-4cfc-9f02-e0e1a7d8f182",
     "d2b02967-fb0b-4a07-a080-2d2af8972b31",
   "4e806161-aa45-41e4-913d-2467b3a1cba9",
