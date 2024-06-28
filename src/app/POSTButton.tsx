@@ -44,17 +44,18 @@ export function POSTButton() {
   }
   const [transcript, setTranscript] = useState<string>('');
 
-  const handleSpeechToText = () => {
+  const [recognition, setRecognition] = useState(null);
+
+  useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'ja-JP';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    const recog = new SpeechRecognition();
+    recog.lang = 'ja-JP';
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+    setRecognition(recog);
 
-    recognition.start();
-
-    recognition.onresult = (event) => {
-      const lastResult = event.results[event.results.length - 1];
+    recog.onresult = (event) => {
+      const lastResult = event.results![event.results.length - 1];
       if (lastResult.isFinal) {
         const text = lastResult[0].transcript;
         setTranscript(text);
@@ -62,9 +63,17 @@ export function POSTButton() {
       }
     };
 
-    recognition.onerror = (event) => {
+    recog.onerror = (event) => {
       console.error('Speech recognition error', event.error);
     };
+  }, []);
+
+  const startRecognition = () => {
+    recognition?.start();
+  };
+
+  const stopRecognition = () => {
+    recognition?.stop();
   };
 
 
@@ -83,7 +92,9 @@ export function POSTButton() {
           return <a key={index} href={m} rel="noopener noreferrer" target="_blank">Music</a>
         })}
         <br/>
-        <button onClick={handleSpeechToText}>音声認識開始</button>
+        <button onClick={startRecognition}>音声認識開始</button>
+        <br/>
+        <button onClick={stopRecognition}>音声認識停止</button>
         <p>認識されたテキスト: {transcript}</p>
       </div>
   )
